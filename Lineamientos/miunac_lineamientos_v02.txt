@@ -1,0 +1,221 @@
+
+MiUNAC Mapa Vivo - Lineamientos Técnicos y Funcionales (Versión 0.2)
+Incluye microestados geoespaciales tipo “timeline” (Twitter-like) y NPCs de eventos.
+
+1. Concepto General de la Plataforma
+------------------------------------
+MiUNAC Mapa Vivo es una plataforma web geoespacial orientada a estudiantes de la Universidad Nacional del Callao. Combina funcionalidades de red social, mentorías académicas, intercambio de objetos, anuncios útiles y reportes de estado del campus, todo sobre un mapa interactivo del campus.
+
+En la Versión 0.2 se incorpora explícitamente el concepto de:
+- Microestados geoespaciales (similar a publicaciones rápidas de Twitter, pero con ubicación dentro del campus).
+- Eventos representados como “NPCs” (puntos en el mapa que representan actividades reales, como sustentaciones de tesis, charlas, ferias, etc., aun cuando los usuarios no conozcan personalmente a los organizadores).
+
+Objetivos:
+- Facilitar interacción entre estudiantes dentro del campus.
+- Permitir tutorías entre pares.
+- Habilitar intercambio o préstamo de objetos.
+- Conectar estudiantes por intereses, proyectos y habilidades.
+- Ofrecer un mapa con reportes de recursos, incidencias y eventos dentro de la UNAC.
+- Proveer un “timeline geoespacial” de lo que está pasando ahora en el campus.
+
+2. Casos de Uso Principales
+----------------------------
+1. Tutorías Académicas:
+   - Publicar tutorías en cursos específicos (ej. “Apoyo en Cálculo I, FIIS 2do piso”).
+   - Estudiantes pueden ver tutores cercanos en el mapa y en un feed de estados recientes.
+
+2. Intercambio/Préstamo de Objetos:
+   - Inventario personal visible (libros, calculadoras, tijeras, etc.).
+   - Filtros en el mapa para identificar materiales disponibles.
+   - Estados rápidos del tipo: “Presto tijeras en biblioteca por 20 minutos”.
+
+3. Formación de Grupos y Redes:
+   - Estados como “Busco gente para practicar guitarra en la explanada”.
+   - Usuarios pueden contactar perfiles compatibles y unirse al punto en el mapa.
+
+4. Empleabilidad Informal:
+   - Servicios estudiantiles (clases, cortes de cabello, debugging, asesoría de tesis).
+   - Publicación geolocalizada y visible en el mapa y en el feed.
+
+5. Reportes del Campus:
+   - Baños cerrados o colapsados.
+   - Falta de agua o luz en un pabellón.
+   - Raciones sobrantes en el comedor.
+   - Enchufes disponibles en una sala de estudio.
+
+6. Microestados geoespaciales (tipo Twitter + mapa):
+   - Publicar mensajes cortos asociados a una ubicación y un momento.
+   - Ejemplos:
+     - “Sustentación de tesis de Ingeniería de Sistemas en el auditorio principal, empieza 3:00 pm.”
+     - “Charla de IA gratis en Aula 204 FIIS, quedan 10 minutos para iniciar.”
+     - “Venta de empanadas en la puerta de la biblioteca.”
+   - Estos estados aparecen:
+     - Como pines en el mapa.
+     - En un feed cronológico filtrable (ej. “Ver sólo eventos de hoy”).
+
+7. NPCs de Eventos:
+   - Algunos estados serán “NPCs”: no representan a un usuario que interactúa, sino a un evento o actividad fija.
+   - Ejemplos:
+     - “Sustentación de tesis programada por la Escuela.”
+     - “Feria de ciencias en explanada central.”
+   - Estos NPCs se marcan con un flag especial y pueden integrarse en el futuro con información oficial de la facultad.
+
+3. MVP - Versión Inicial
+-------------------------
+El MVP deberá incluir:
+- Mapa del campus UNAC con capas geoJSON.
+- Registro y perfiles básicos de usuarios.
+- Microestados geoespaciales:
+  - Tipo, ubicación, texto corto, timestamp, duración.
+  - Visualización en mapa + lista cronológica de estados recientes.
+- Inventario simple del usuario.
+- Chat básico 1-a-1.
+- Panel de filtros por tipo de estado (Tutoría, Préstamo, Servicio, Grupo, Reporte, Evento).
+- Sistema de permisos y privacidad.
+- Marcador opcional de estados tipo “NPC” para representar eventos del campus.
+
+4. Arquitectura del Sistema
+----------------------------
+Backend:
+- Django + Django REST Framework.
+- WebSockets con Django Channels (opcional, recomendado para estados en tiempo casi real).
+- PostgreSQL + PostGIS como base geoespacial.
+
+Frontend:
+- Next.js (React) recomendado para una SPA moderna.
+- Tailwind CSS para diseño responsivo y moderno.
+- Framer Motion para animaciones suaves tipo videojuego casual.
+- MapLibre GL JS o Mapbox GL JS para mapa estilizado.
+- Diseño mobile-first para que la experiencia sea óptima en navegador móvil.
+
+Geodatos:
+- Campus digitalizado con QGIS.
+- Capas exportadas a GeoJSON (polígono de campus y puntos de interés).
+- Límite de navegación del mapa restringido al campus.
+
+5. Modelos Propuestos (Django)
+-------------------------------
+User:
+- Autenticación básica.
+
+Profile:
+- Usuario (OneToOne).
+- Nickname.
+- Carrera y ciclo.
+- Intereses.
+- Skills.
+- Avatar (campo opcional para imagen o tipo de sprite).
+
+Location:
+- Geometría (PointField).
+- Timestamp (última actualización).
+
+Status (microestado geoespacial):
+- Usuario (opcional si es NPC; null para estados “oficiales” o de sistema).
+- Tipo: Tutoría, Préstamo, Servicio, Grupo, Reporte, Evento.
+- Texto corto (similar a un tweet, máx. ~280 caracteres).
+- Location (PointField o relación a Location).
+- Timestamp de creación.
+- Tiempo de expiración (para estados temporales).
+- Flag is_npc (boolean) para diferenciar estados de usuario vs NPC/evento.
+- Opciones de visibilidad: pública, sólo amigos, sólo seguidores (para futuras versiones).
+
+Item (Inventario):
+- Usuario propietario.
+- Nombre.
+- Tipo (Libro, Instrumento, Herramienta, Electrónico, Otro).
+- Descripción breve.
+- Disponible (boolean).
+
+Message:
+- Emisor.
+- Receptor.
+- Texto.
+- Timestamp.
+- Estado de lectura.
+
+Event (opcional, futuro):
+- Título.
+- Descripción.
+- Ubicación.
+- Fecha y hora de inicio y fin.
+- Organizador (escuela, grupo estudiantil, usuario).
+- Relación con Status NPC para mostrarlo en el mapa y en el feed.
+
+6. Funcionalidades Secundarias Futuras
+---------------------------------------
+- Avatares animados o iconos personalizados.
+- Sistema de reputación (likes, comentarios en estados, calificaciones por tutorías o servicios).
+- Portafolio estudiantil integrado (GitHub, LinkedIn).
+- Proyectos estudiantiles con búsqueda de colaboradores.
+- Eventos del campus integrados desde fuentes oficiales (API o carga manual).
+- Gamificación (insignias, logros, niveles).
+- Notificaciones push (PWA) para estados cercanos o relevantes.
+
+7. Privacidad y Seguridad
+--------------------------
+- Ubicación redondeada por zonas para evitar precisión exacta cuando el usuario lo prefiera.
+- Modo invisible (no mostrar posición ni estados en el mapa).
+- Opciones de visibilidad del inventario y de los estados.
+- Sistema de reportes contra usuarios, estados o NPCs falsos.
+- Separación entre perfiles públicos y datos sensibles.
+- Moderación mínima para evitar contenidos ofensivos o inseguros.
+
+8. Procedimiento de Desarrollo
+-------------------------------
+1. Crear repositorio Git + ramas:
+   - main
+   - backend
+   - frontend
+   - geodata
+   - features/* (ej. features/status-feed, features/chat, etc.)
+
+2. Fases de trabajo:
+   Fase 1:
+     - Digitalización del campus.
+     - Backend básico (Users, Profiles).
+   Fase 2:
+     - API geoespacial (Status, Location).
+     - Mapa Leaflet/MapLibre con visualización de estados.
+     - Feed cronológico simple de estados recientes.
+   Fase 3:
+     - Inventario + chat.
+   Fase 4:
+     - Filtros avanzados, NPCs de eventos, mejoras UX y animaciones.
+
+3. Pruebas:
+   - Unit tests en Django.
+   - Tests de endpoints con Postman o pytest + requests.
+   - Validación geoespacial (PostGIS) y límites del campus.
+   - Pruebas de usabilidad en móvil.
+
+4. Documentación:
+   - README detallado.
+   - Carpeta /docs con:
+     - Arquitectura de alto nivel.
+     - Diagrama ERD.
+     - Definición de endpoints API (OpenAPI/Swagger).
+     - Guía de contribución.
+   - Este archivo de lineamientos (Versión 0.2) como referencia funcional y técnica.
+
+9. Alcances
+------------
+- MVP limitado al campus principal.
+- No se integrará a Moodle/SGA en esta etapa.
+- No requiere apoyo institucional inicial.
+- Enfoque: Estudiantes para estudiantes.
+- La capa de “NPCs” se puede alimentar manualmente (por el propio desarrollador o por un pequeño equipo) con eventos reales del campus.
+
+10. Tecnologías Confirmadas
+----------------------------
+- Lenguaje backend: Python.
+- Framework backend: Django + DRF.
+- Base geoespacial: PostgreSQL + PostGIS.
+- Frontend: Next.js (React) + Tailwind CSS + Framer Motion.
+- Mapa: MapLibre GL JS o Mapbox GL JS.
+- Geoprocesamiento: QGIS.
+- Hosting futuro: Render, Railway, Fly.io o VPS.
+- Posible PWA para experiencia tipo app en móvil.
+
+-----------------------------------------
+Fin del archivo de lineamientos técnicos Versión 0.2 (con microestados geoespaciales y NPCs).
