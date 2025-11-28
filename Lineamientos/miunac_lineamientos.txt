@@ -1,0 +1,165 @@
+
+MiUNAC Mapa Vivo - Lineamientos Técnicos y Funcionales (Versión 0.1)
+
+1. Concepto General de la Plataforma
+------------------------------------
+MiUNAC Mapa Vivo es una plataforma web geoespacial orientada a estudiantes de la Universidad Nacional del Callao. Combina funcionalidades de red social, mentorías académicas, intercambio de objetos, anuncios útiles y reportes de estado del campus, todo sobre un mapa interactivo del campus.
+
+Objetivos:
+- Facilitar interacción entre estudiantes dentro del campus.
+- Permitir tutorías entre pares.
+- Habilitar intercambio o préstamo de objetos.
+- Conectar estudiantes por intereses, proyectos y habilidades.
+- Ofrecer un mapa con reportes de recursos e incidencias dentro de la UNAC.
+
+2. Casos de Uso Principales
+----------------------------
+1. Tutorías Académicas:
+   - Publicar tutorías en cursos específicos.
+   - Estudiantes pueden ver tutores cercanos en el mapa.
+
+2. Intercambio/Préstamo de Objetos:
+   - Inventario personal visible (libros, calculadoras, tijeras, etc.).
+   - Filtros en el mapa para identificar materiales disponibles.
+
+3. Formación de Grupos y Redes:
+   - Estados como “Busco gente para practicar guitarra”.
+   - Usuarios pueden contactar perfiles compatibles.
+
+4. Empleabilidad Informal:
+   - Servicios estudiantiles (clases, cortes de cabello, debugging).
+   - Publicación geolocalizada.
+
+5. Reportes del Campus:
+   - Baños cerrados.
+   - Falta de agua.
+   - Raciones sobrantes.
+   - Enchufes disponibles.
+
+3. MVP - Versión Inicial
+-------------------------
+El MVP deberá incluir:
+- Mapa del campus UNAC con capas geoJSON.
+- Registro y perfiles básicos de usuarios.
+- Estados geolocalizados (tipo, ubicación, descripción).
+- Inventario simple del usuario.
+- Chat básico 1-a-1.
+- Panel de filtros por tipo de estado.
+- Sistema de permisos y privacidad.
+
+4. Arquitectura del Sistema
+----------------------------
+Backend:
+- Django + Django REST Framework.
+- WebSockets con Django Channels (opcional).
+- PostgreSQL + PostGIS como base geoespacial.
+
+Frontend:
+- Opción A: React/Next.js.
+- Opción B: Plantillas Django + Leaflet (MVP rápido).
+- Mapa: Leaflet o Mapbox GL JS.
+
+Geodatos:
+- Campus digitalizado con QGIS.
+- Capas exportadas a GeoJSON.
+- Límite del mapa restringido al campus.
+
+5. Modelos Propuestos (Django)
+-------------------------------
+User:
+- Autenticación básica.
+
+Profile:
+- Nickname.
+- Carrera y ciclo.
+- Intereses.
+- Skills.
+- Avatar (más adelante).
+
+Location:
+- Geometría (PointField).
+- Timestamp.
+
+Status:
+- Tipo: Tutoría, Préstamo, Servicio, Grupo, Aviso.
+- Descripción.
+- Usuario.
+- Location.
+- Tiempo de expiración.
+
+Item (Inventario):
+- Nombre.
+- Tipo.
+- Disponible (boolean).
+
+Message:
+- Emisor.
+- Receptor.
+- Texto.
+- Timestamp.
+
+6. Funcionalidades Secundarias Futuras
+---------------------------------------
+- Avatares animados.
+- Sistema de reputación.
+- Portafolio estudiantil integrado (GitHub).
+- Proyectos estudiantiles con búsqueda de colaboradores.
+- Eventos del campus en tiempo real.
+- Gamificación (insignias, logros).
+
+7. Privacidad y Seguridad
+--------------------------
+- Ubicación redondeada por zonas para evitar precisión exacta.
+- Modo invisible.
+- Opciones de visibilidad del inventario.
+- Sistema de reportes contra usuarios o contenido.
+- Separación entre perfiles públicos y datos sensibles.
+
+8. Procedimiento de Desarrollo
+-------------------------------
+1. Crear repositorio Git + ramas:
+   - main
+   - backend
+   - frontend
+   - geodata
+   - features/*
+
+2. Fases de trabajo:
+   Fase 1:
+     - Digitalización del campus.
+     - Backend básico (Users, Profiles).
+   Fase 2:
+     - API geoespacial (Status, Location).
+     - Mapa Leaflet.
+   Fase 3:
+     - Inventario + chat.
+   Fase 4:
+     - Filtros, reportes, mejoras UX.
+
+3. Pruebas:
+   - Unit tests en Django.
+   - Tests de endpoints con Postman.
+   - Validación geoespacial (PostGIS).
+
+4. Documentación:
+   - README detallado.
+   - Carpeta /docs con arquitectura, ERD, endpoints API.
+
+9. Alcances
+------------
+- MVP limitado al campus principal.
+- No se integrará a Moodle/SGA en esta etapa.
+- No requiere apoyo institucional inicial.
+- Enfoque: Estudiantes para estudiantes.
+
+10. Tecnologías Confirmadas
+----------------------------
+- Lenguaje backend: Python.
+- Framework backend: Django + DRF.
+- Base geoespacial: PostgreSQL + PostGIS.
+- Frontend: Leaflet + Django templates (MVP).
+- Geoprocesamiento: QGIS.
+- Hosting futuro: Render, Railway o VPS.
+
+-----------------------------------------
+Fin del archivo de lineamientos técnicos.
