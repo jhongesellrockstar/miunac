@@ -1,93 +1,126 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { useEffect, useMemo, useRef } from 'react'
+import {
+  LayersControl,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap
+} from 'react-leaflet'
 import L from 'leaflet'
-import PlaceList from './PlaceList'
-import 'leaflet/dist/leaflet.css'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 
-// Fix Leaflet's default icon path when bundling with Vite
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow
+const CAMPUS_CENTER = { lat: -12.06135, lon: -77.15656, zoom: 17 }
+
+const createPlaceIcon = (category) =>
+  L.divIcon({
+    className: 'marker-icon place',
+    html: `<div class="place-dot ${category || 'default'}"></div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 28]
+  })
+
+const statusIcon = L.divIcon({
+  className: 'marker-icon status',
+  html: '<div class="status-bubble">💬</div>',
+  iconSize: [36, 36],
+  iconAnchor: [18, 34]
 })
 
-const visibilityColors = {
-  public: '#22c55e',
-  friends: '#3b82f6',
-  private: '#f59e0b'
-}
-
-const placeEmoji = {
-  facultad: '🏛️',
-  biblioteca: '📚',
-  comedor: '🍽️',
-  laboratorio: '🧪',
-  deporte: '🏟️'
-}
-
-const getStatusIcon = (visibility = 'public') =>
-  L.divIcon({
-    className: 'status-icon',
-    html: `<div style="background:${visibilityColors[visibility] || '#22c55e'}"></div>`,
-    iconSize: [24, 24]
+const createAvatarIcon = (sprite) =>
+  L.icon({
+    iconUrl:
+      sprite ||
+      'https://raw.githubusercontent.com/pokeapi/sprites/master/sprites/pokemon/132.png',
+    iconSize: [42, 42],
+    iconAnchor: [21, 38],
+    popupAnchor: [0, -24]
   })
 
-const getPlaceIcon = (type = 'default') =>
-  L.divIcon({
-    className: 'place-icon',
-    html: `<div>${placeEmoji[type] || '📍'}</div>`,
-    iconSize: [28, 28]
-  })
+const MapUpdater = ({ center }) => {
+  const map = useMap()
+  const initial = useRef(false)
 
-function MapView({ places, statuses, center }) {
+  useEffect(() => {
+    if (!center) return
+    if (!initial.current) {
+      map.setView([center.lat, center.lon], CAMPUS_CENTER.zoom)
+      initial.current = true
+      return
+    }
+    map.flyTo([center.lat, center.lon], map.getZoom(), { duration: 0.5 })
+  }, [center, map])
+
+  return null
+}
+
+const MapView = ({ places, liveStatuses, currentUser, currentLocation, onMapReady }) => {
+  const position = currentLocation || { lat: CAMPUS_CENTER.lat, lon: CAMPUS_CENTER.lon }
+
+  const userIcon = useMemo(() => createAvatarIcon(currentUser?.avatar_sprite), [
+    currentUser?.avatar_sprite
+  ])
+
   return (
-    <div className="map-wrapper card">
-      <MapContainer center={[center.lat, center.lon]} zoom={17} scrollWheelZoom className="map-container">
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    <div className="map-shell">
+      <MapContainer
+        center={[CAMPUS_CENTER.lat, CAMPUS_CENTER.lon]}
+        zoom={CAMPUS_CENTER.zoom}
+        className="map"
+        whenCreated={onMapReady}
+      >
+        <MapUpdater center={position} />
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="OpenStreetMap">
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Carto Dark">
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Carto Voyager">
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+          </LayersControl.BaseLayer>
+        </LayersControl>
 
-        {places.map((place) => {
-          const lat = place.latitude ?? place.lat ?? place.location?.coordinates?.[1]
-          const lon = place.longitude ?? place.lon ?? place.location?.coordinates?.[0]
-          if (!lat || !lon) return null
-          return (
-            <Marker key={place.id || place.name} position={[lat, lon]} icon={getPlaceIcon(place.type || place.category)}>
-              <Popup>
-                <div>
-                  <strong>{place.name}</strong>
-                  {place.description && <p className="muted">{place.description}</p>}
-                </div>
-              </Popup>
-            </Marker>
-          )
-        })}
+        {places?.map((place) => (
+          <Marker
+            key={place.id || place.name}
+            position={[place.latitude || place.lat, place.longitude || place.lon]}
+            icon={createPlaceIcon(place.category)}
+          >
+            <Popup>
+              <strong>{place.name}</strong>
+              <br />
+              <span className="muted tiny">{place.category || 'Lugar'}</span>
+            </Popup>
+          </Marker>
+        ))}
 
-        {statuses.map((status) => {
-          const lat = status.latitude ?? status.lat ?? status.location?.coordinates?.[1]
-          const lon = status.longitude ?? status.lon ?? status.location?.coordinates?.[0]
-          if (!lat || !lon) return null
-          const visibility = status.visibility || status.scope || 'public'
-          return (
-            <Marker key={status.id || status.created_at} position={[lat, lon]} icon={getStatusIcon(visibility)}>
-              <Popup>
-                <div className="status-popup">
-                  <div className="status-popup-header">
-                    <span className="pill small">{visibility}</span>
-                    <strong>{status.nickname || 'Estudiante'}</strong>
-                  </div>
-                  <p>{status.message}</p>
-                  {status.expires_at && <p className="muted">Expira: {new Date(status.expires_at).toLocaleTimeString()}</p>}
-                </div>
-              </Popup>
-            </Marker>
-          )
-        })}
+        {liveStatuses?.map((status) => (
+          <Marker
+            key={status.id || `${status.nickname}-${status.message}`}
+            position={[status.latitude || status.lat, status.longitude || status.lon]}
+            icon={statusIcon}
+          >
+            <Popup>
+              <div className="status-popup">
+                <strong>{status.nickname || 'Anonimo'}</strong>
+                <p className="status-text">{status.message}</p>
+                {status.visibility && <span className="pill small">{status.visibility}</span>}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
 
-        <PlaceList places={places} />
+        {position && (
+          <Marker position={[position.lat, position.lon]} icon={userIcon}>
+            <Popup>
+              <div className="status-popup">
+                <strong>{currentUser?.nickname || 'Yo'}</strong>
+                <p className="muted tiny">Tu ubicación actual</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
       </MapContainer>
     </div>
   )
