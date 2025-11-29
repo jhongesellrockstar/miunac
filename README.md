@@ -52,20 +52,26 @@ MiUNAC Mapa Vivo es una plataforma hecha por estudiantes para estudiantes de la 
 
 ## Instalación y ejecución (backend y frontend)
 ### Backend
-1. Crear entorno virtual y activar:
+1. Crear/activar el entorno (ejemplo con conda del prompt):
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate
+   conda activate miunac
    ```
-2. Instalar dependencias:
+2. Instalar dependencias desde la raíz del repo:
    ```bash
    pip install -r requirements.txt
    ```
-3. Configurar variables de entorno (PostgreSQL + PostGIS) y ejecutar migraciones:
+3. Arrancar el backend:
    ```bash
+   cd miunac_backend
+   python manage.py makemigrations
    python manage.py migrate
    python manage.py runserver
    ```
+4. Endpoints clave del MVP:
+   - Salud: `GET /api/health/`
+   - Lugares del campus: `GET /api/campus/places/`
+   - Estados en vivo (incluye acción `nearby`): `GET /api/campus/statuses/`
+   - Endpoint geoespacial de estados cercanos: `GET /api/campus/statuses/nearby/?lat=<lat>&lon=<lon>&radius=<m>`
 
 ### Base de datos con PostGIS
 1. Instalar PostgreSQL y PostGIS.
