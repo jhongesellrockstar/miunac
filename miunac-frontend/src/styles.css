@@ -300,6 +300,11 @@ textarea {
   box-shadow: var(--shadow);
 }
 
+.miunac-login-error {
+  color: #ef4444;
+  margin-top: 10px;
+}
+
 .glass {
   background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.18);

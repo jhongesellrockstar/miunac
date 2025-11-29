@@ -1,39 +1,33 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { login as loginRequest } from '../api/auth'
 import useAppStore from '../store/useAppStore'
 
 const LoginPage = () => {
   const navigate = useNavigate()
-  const { login } = useAppStore()
-  const [code, setCode] = useState('')
+  const { login: setSession } = useAppStore()
+  const [codigoUnac, setCodigoUnac] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
-  // 🚧 Login simulado: acepta cualquier código UNAC y contraseña
-  // Más adelante conectaremos esto al backend de Django.
-  if (!code || !password) {
-    alert("Por favor ingresa código UNAC y contraseña.");
-    return;
+    try {
+      await loginRequest({ codigoUnac, password })
+      setSession(codigoUnac, password)
+      navigate('/')
+    } catch (err) {
+      const message =
+        err.response?.data?.detail || 'No se pudo iniciar sesión. Intenta nuevamente.'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
-
-  // Guardamos algo mínimo en el store / localStorage si se usa
-  try {
-    localStorage.setItem(
-      "miunac_user",
-      JSON.stringify({
-        code,
-        name: "Usuario MiUNAC",
-      })
-    );
-  } catch (err) {
-    console.warn("No se pudo guardar en localStorage:", err);
-  }
-
-  // Redirige a la pantalla principal (ajusta si tu ruta principal es otra)
-  navigate("/");
-};
 
 
   return (
@@ -43,7 +37,11 @@ const LoginPage = () => {
         <h2>Inicio de sesión</h2>
         <form className="stacked" onSubmit={handleSubmit}>
           <label className="muted tiny">Código UNAC</label>
-          <input value={code} onChange={(e) => setCode(e.target.value)} required />
+          <input
+            value={codigoUnac}
+            onChange={(e) => setCodigoUnac(e.target.value)}
+            required
+          />
           <label className="muted tiny">Contraseña</label>
           <input
             type="password"
@@ -51,9 +49,10 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button className="btn primary" type="submit">
-            Ingresar
+          <button className="btn primary" type="submit" disabled={loading}>
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
+          {error && <p className="miunac-login-error">{error}</p>}
         </form>
       </div>
     </div>
