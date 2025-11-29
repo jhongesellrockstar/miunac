@@ -1,0 +1,11 @@
+Backend Django (en otra ventana de Anaconda Prompt)
+
+conda activate miunac
+cd C:\Users\jhonv\Documents\GitHub2025\miunac\miunac_backend
+python manage.py runserver
+
+
+Frontend Vite/React
+
+cd C:\Users\jhonv\Documents\GitHub2025\miunac\miunac-frontend
+npm run dev

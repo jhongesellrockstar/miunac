@@ -4,4 +4,7 @@
     <option name="sdkName" value="miunac" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="miunac" project-jdk-type="Python SDK" />
+  <component name="PyCharmProfessionalAdvertiser">
+    <option name="shown" value="true" />
+  </component>
 </project>
