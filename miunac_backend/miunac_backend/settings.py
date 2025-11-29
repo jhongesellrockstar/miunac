@@ -12,12 +12,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-GDAL_LIBRARY_PATH = os.path.join(
-    r"C:\Users\jhonv\anaconda3\envs\miunac\Library\bin",
-    "gdal.dll"     # <-- cámbialo por tu DLL real
-)
-GEOS_LIBRARY_PATH = r"C:\Users\jhonv\anaconda3\envs\miunac\Library\bin\geos_c.dll"
-PROJ_LIB = r"C:\Users\jhonv\anaconda3\envs\miunac\Library\share\proj"
+
+
+GDAL_LIBRARY_PATH = os.environ.get("GDAL_LIBRARY_PATH")
+GEOS_LIBRARY_PATH = os.environ.get("GEOS_LIBRARY_PATH")
+PROJ_LIB = os.environ.get("PROJ_LIB")
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -45,10 +44,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_gis",
+    "corsheaders",
     "django.contrib.gis",
+    "campus",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -83,14 +87,16 @@ WSGI_APPLICATION = "miunac_backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'miunac',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": "miunac",
+        "USER": "postgres",
+        "PASSWORD": "admin",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Password validation
@@ -133,3 +139,11 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+}
