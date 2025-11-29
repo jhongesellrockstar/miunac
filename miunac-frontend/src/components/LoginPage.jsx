@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login as loginRequest } from '../api/auth'
+import { login } from '../api/auth'
 import useAppStore from '../store/useAppStore'
 
 const LoginPage = () => {
   const navigate = useNavigate()
-  const { login: setSession } = useAppStore()
+  const { setSession } = useAppStore()
   const [codigoUnac, setCodigoUnac] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,12 +17,13 @@ const LoginPage = () => {
     setLoading(true)
 
     try {
-      await loginRequest({ codigoUnac, password })
-      setSession(codigoUnac, password)
+      await login(codigoUnac, password)
+      await setSession(codigoUnac, password)
       navigate('/')
     } catch (err) {
       const message =
-        err.response?.data?.detail || 'No se pudo iniciar sesión. Intenta nuevamente.'
+        err.response?.data?.detail || err.message ||
+        'No se pudo iniciar sesión. Intenta nuevamente.'
       setError(message)
     } finally {
       setLoading(false)
