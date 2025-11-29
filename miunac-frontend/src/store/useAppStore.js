@@ -8,6 +8,7 @@ import {
   getPlaces,
   updateProfile
 } from '../api/client'
+import { login } from '../api/auth'
 
 const CAMPUS_CENTER = { lat: -12.06135, lon: -77.15656 }
 
@@ -27,18 +28,11 @@ export const useAppStore = create((set, get) => ({
   setLiveStatuses: (liveStatuses) => set({ liveStatuses }),
   setCurrentLocation: (coords) => set({ currentLocation: coords }),
 
-  login: (code, password) => {
-    const nickname = code ? `Explorador ${code}` : 'Explorador UNAC'
-    const mockProfile = {
-      code,
-      nickname,
-      avatar_sprite:
-        'https://raw.githubusercontent.com/pokeapi/sprites/master/sprites/pokemon/25.png',
-      skills: ['Mapeo', 'Logística'],
-      interests: ['Exploración', 'Tecnología']
-    }
-    set({ isLogged: true, user: mockProfile })
-    return mockProfile
+  setSession: async (codigo_unac, password, profile = null) => {
+    const sessionData = profile ?? (await login(codigo_unac, password))
+    const userProfile = sessionData?.user ?? sessionData ?? {}
+    set({ isLogged: true, user: { ...userProfile, codigo_unac } })
+    return sessionData
   },
 
   logout: () => set({ isLogged: false, user: null }),

@@ -13,7 +13,9 @@ export async function login(codigo_unac, password) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.detail || "Error en login");
+    const error = new Error(errorData.detail || "Error en login");
+    error.response = { data: errorData };
+    throw error;
   }
 
   return await response.json();
