@@ -14,9 +14,9 @@ from pathlib import Path
 import os
 
 
-GDAL_LIBRARY_PATH = os.environ.get("GDAL_LIBRARY_PATH")
-GEOS_LIBRARY_PATH = os.environ.get("GEOS_LIBRARY_PATH")
-PROJ_LIB = os.environ.get("PROJ_LIB")
+GDAL_LIBRARY_PATH = r"C:\Users\jhonv\anaconda3\envs\miunac\Library\bin\gdal.dll"
+GEOS_LIBRARY_PATH = r"C:\Users\jhonv\anaconda3\envs\miunac\Library\bin\geos_c.dll"
+os.environ["PROJ_LIB"] = r"C:\Users\jhonv\anaconda3\envs\miunac\Library\share\proj"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

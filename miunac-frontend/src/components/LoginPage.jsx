@@ -9,10 +9,32 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    login(code, password)
-    navigate('/')
+  e.preventDefault();
+
+  // 🚧 Login simulado: acepta cualquier código UNAC y contraseña
+  // Más adelante conectaremos esto al backend de Django.
+  if (!code || !password) {
+    alert("Por favor ingresa código UNAC y contraseña.");
+    return;
   }
+
+  // Guardamos algo mínimo en el store / localStorage si se usa
+  try {
+    localStorage.setItem(
+      "miunac_user",
+      JSON.stringify({
+        code,
+        name: "Usuario MiUNAC",
+      })
+    );
+  } catch (err) {
+    console.warn("No se pudo guardar en localStorage:", err);
+  }
+
+  // Redirige a la pantalla principal (ajusta si tu ruta principal es otra)
+  navigate("/");
+};
+
 
   return (
     <div className="auth-screen">
