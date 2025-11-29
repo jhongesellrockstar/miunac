@@ -60,14 +60,17 @@ MiUNAC Mapa Vivo es una plataforma hecha por estudiantes para estudiantes de la 
    ```bash
    pip install -r requirements.txt
    ```
-3. Arrancar el backend:
+3. Instalar librerías de sistema GIS (GDAL/GEOS/PROJ):
+   - **Windows (Conda)**: `conda install -c conda-forge gdal geos proj` y verifica que las variables `GDAL_LIBRARY_PATH`, `GEOS_LIBRARY_PATH` y `PROJ_LIB` queden configuradas automáticamente en el entorno (si no, apunta manualmente a las rutas `Library/bin` del entorno).
+   - **Linux (Debian/Ubuntu)**: `sudo apt-get install gdal-bin libgdal-dev libgeos-dev proj-bin` y exporta `GDAL_LIBRARY_PATH`, `GEOS_LIBRARY_PATH` y `PROJ_LIB` si no se detectan.
+4. Arrancar el backend:
    ```bash
    cd miunac_backend
    python manage.py makemigrations
    python manage.py migrate
    python manage.py runserver
    ```
-4. Endpoints clave del MVP:
+5. Endpoints clave del MVP:
    - Salud: `GET /api/health/`
    - Lugares del campus: `GET /api/campus/places/`
    - Estados en vivo (incluye acción `nearby`): `GET /api/campus/statuses/`
@@ -83,16 +86,17 @@ MiUNAC Mapa Vivo es una plataforma hecha por estudiantes para estudiantes de la 
    ```
 3. Ajustar credenciales en la configuración de Django.
 
-### Frontend
-1. Instalar dependencias de Next.js:
+### Frontend (Vite + React)
+1. Instalar dependencias de frontend (asegura que se descargue `react-router-dom` y demás librerías de `package.json`):
    ```bash
+   cd miunac-frontend
    npm install
    ```
 2. Ejecutar servidor de desarrollo:
    ```bash
    npm run dev
    ```
-3. Acceder a `http://localhost:3000` para visualizar la aplicación.
+3. Acceder a la URL que imprime Vite (por defecto `http://localhost:5173/`).
 
 ## Estructura del repositorio
 - `backend/`: código de la API en Django REST Framework (endpoints, modelos, serializers).
